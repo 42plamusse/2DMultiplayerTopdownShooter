@@ -38,7 +38,14 @@ public class Controls : NetworkBehaviour
         cameraFollowScript.enabled = true;
         crossHair.SetActive(true);
         //Cursor.visible = false;
-        transform.name = "Player" + netId.ToString();
+        transform.name = netId.ToString();
+        Cmd_RenamePlayer();
+    }
+
+    [Command]
+    void Cmd_RenamePlayer()
+    {
+        transform.name = netId.ToString();
     }
 
     void Update()
@@ -48,7 +55,7 @@ public class Controls : NetworkBehaviour
         Aim();
         if (shoot)
         {
-            CmdShootArrow(aim, transform.position, gameObject);
+            CmdShootArrow(aim, transform.position, netId);
         }
     }
 
@@ -63,7 +70,7 @@ public class Controls : NetworkBehaviour
         MovementInput();
         AimInput();
 
-        shoot = Input.GetButtonUp("Fire1");
+        shoot = Input.GetButtonDown("Fire1");
     }
 
     void MovementInput()
@@ -93,7 +100,7 @@ public class Controls : NetworkBehaviour
     }
 
     [Command]
-    void CmdShootArrow(Vector2 aim, Vector3 initialPosition, GameObject player)
+    void CmdShootArrow(Vector2 aim, Vector3 initialPosition, uint _netId)
     {
         Vector2 shootingDirection = new Vector2(aim.x, aim.y);
         Vector3 offset = aim * 1.5f;
@@ -101,14 +108,16 @@ public class Controls : NetworkBehaviour
             Mathf.Atan2(shootingDirection.y, shootingDirection.x) * Mathf.Rad2Deg);
         GameObject arrow =
             Instantiate(arrowPrefab,
-            initialPosition + offset,
+            initialPosition,
             arrowTransformRotation);
         shootingDirection.Normalize();
         Arrow arrowScript = arrow.GetComponent<Arrow>();
         arrowScript.velocity = shootingDirection * ARROW_BASE_SPEED;
-        arrowScript.localPlayer = player;
+        print("netID" + netId);
+        print("netID" + _netId);
+        arrowScript.shooterId = _netId;
         NetworkServer.Spawn(arrow);
-        Destroy(arrow, 2.0f);
+        Destroy(arrow, 60.0f);
 
     }
 }

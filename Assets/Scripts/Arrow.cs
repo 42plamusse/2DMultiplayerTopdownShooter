@@ -5,11 +5,32 @@ using Mirror;
 
 public class Arrow : NetworkBehaviour
 {
+    [Header("Server")]
     public Vector2 velocity;
-    public GameObject localPlayer;
-    public bool hitTarget;
-    private void Update()
+    public uint shooterId;
+
+    [Header("Synced")]
+    [SyncVar]
+    public bool hasHit = false;
+    [SyncVar]
+    public Transform parent;
+
+    private bool nested = false;
+
+    private void FixedUpdate()
     {
+        if (hasHit)
+        {
+            if (!nested)
+            {
+                var arrowNest = new GameObject();
+                arrowNest.transform.parent = parent;
+                arrowNest.name = "NestingArrow";
+                transform.parent = arrowNest.transform;
+                nested = true;
+             }
+        }
+        if (!isServer || hasHit) return;
         Vector2 currentPosition = new Vector2(transform.position.x,
             transform.position.y);
         Vector2 nextPosition = currentPosition + velocity * Time.deltaTime;
@@ -21,28 +42,30 @@ public class Arrow : NetworkBehaviour
             foreach(RaycastHit2D hit in hits)
             {
                 GameObject other = hit.collider.gameObject;
-                if (other != localPlayer)
+                print(hit.collider.name);
+                print(shooterId);
+                print("TransformPos" + transform.position);
+                print("currentPos" + currentPosition);
+                print("nextPos" + nextPosition);
+
+                if (other.name != shooterId.ToString())
                 {
                     if (hit.collider.CompareTag("Player"))
                     {
-                        print(hit.collider);
-                        print("TransformPos" +transform.position);
-                        print("currentPos" + currentPosition);
-                        print("nextPos" + nextPosition);
-
-                        //gameObject.SetActive(false);
-                        //NetworkServer.Destroy(gameObject);
-                        hitTarget = true;
+                        hasHit = true;
+                        parent = hit.collider.transform;
+                        break;
+                    }
+                    else if (hit.collider.CompareTag("Walls"))
+                    {
+                        hasHit = true;
+                        parent = hit.collider.transform;
                         break;
                     }
                 }
             }
         }
-        if (!hitTarget)
-            transform.position = nextPosition;
-        else
-            TellServerToDestroyObject(gameObject);
-
+        transform.position = nextPosition;
     }
 
     [Client]
