@@ -37,22 +37,24 @@ public class Controls : NetworkBehaviour
         cameraFollowScript.target = transform; //Fix camera on "me"
         cameraFollowScript.enabled = true;
         crossHair.SetActive(true);
-        Cursor.visible = false;
+        //Cursor.visible = false;
+        transform.name = "Player" + netId.ToString();
     }
 
     void Update()
     {
-        if (!isLocalPlayer)
-            return;
+        if (!isLocalPlayer) return;
         ProcessInput();
         Aim();
-        Shoot();
+        if (shoot)
+        {
+            CmdShootArrow(aim, transform.position, gameObject);
+        }
     }
 
     private void FixedUpdate()
     {
-        if (!isLocalPlayer)
-            return;
+        if (!isLocalPlayer) return;
         Move();
     }
 
@@ -91,36 +93,22 @@ public class Controls : NetworkBehaviour
     }
 
     [Command]
-    void CmdShootArrow(GameObject arrow)
+    void CmdShootArrow(Vector2 aim, Vector3 initialPosition, GameObject player)
     {
-        if (!isServer) return;
-        NetworkServer.Spawn(arrow);
-        NetworkServer.Destroy(arrow);
-
-        StartCoroutine(DestroyArrow(arrow));
-    }
-
-    IEnumerator DestroyArrow(GameObject arrow)
-    {
-        yield return new WaitForSeconds(2.0f);
-        NetworkServer.Destroy(arrow);
-
-    }
-
-    void Shoot()
-    {
-
-        if (!shoot) return;
         Vector2 shootingDirection = new Vector2(aim.x, aim.y);
+        Vector3 offset = aim * 1.5f;
+        Quaternion arrowTransformRotation = Quaternion.Euler(0, 0,
+            Mathf.Atan2(shootingDirection.y, shootingDirection.x) * Mathf.Rad2Deg);
         GameObject arrow =
-            Instantiate(arrowPrefab, transform.position, Quaternion.identity);
+            Instantiate(arrowPrefab,
+            initialPosition + offset,
+            arrowTransformRotation);
         shootingDirection.Normalize();
         Arrow arrowScript = arrow.GetComponent<Arrow>();
-        arrow.transform.Rotate(0.0f, 0.0f, Mathf.Atan2(
-            shootingDirection.y, shootingDirection.x) * Mathf.Rad2Deg);
         arrowScript.velocity = shootingDirection * ARROW_BASE_SPEED;
-        arrowScript.localPlayer = gameObject;
-        //CmdShootArrow(arrow);
+        arrowScript.localPlayer = player;
+        NetworkServer.Spawn(arrow);
         Destroy(arrow, 2.0f);
+
     }
 }
