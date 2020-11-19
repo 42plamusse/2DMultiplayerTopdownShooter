@@ -117,7 +117,7 @@ public class Controls : NetworkBehaviour
         print("netID" + _netId);
         arrowScript.shooterId = _netId;
         NetworkServer.Spawn(arrow);
-        Destroy(arrow, 60.0f);
+        Destroy(arrow, 5.0f);
 
     }
 }

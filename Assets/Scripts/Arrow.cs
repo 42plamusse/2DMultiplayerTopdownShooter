@@ -50,13 +50,14 @@ public class Arrow : NetworkBehaviour
 
                 if (other.name != shooterId.ToString())
                 {
-                    if (hit.collider.CompareTag("Player"))
+                    if (other.CompareTag("Player"))
                     {
                         hasHit = true;
                         parent = hit.collider.transform;
+                        other.GetComponent<Combat>().TakeDamage(10);
                         break;
                     }
-                    else if (hit.collider.CompareTag("Walls"))
+                    else if (other.CompareTag("Walls"))
                     {
                         hasHit = true;
                         parent = hit.collider.transform;
@@ -68,22 +69,9 @@ public class Arrow : NetworkBehaviour
         transform.position = nextPosition;
     }
 
-    [Client]
-    public void TellServerToDestroyObject(GameObject obj)
+    private void OnDestroy()
     {
-        CmdDestroyObject(obj);
-    }
-
-    [Command(ignoreAuthority =true)]
-    private void CmdDestroyObject(GameObject obj)
-    {
-        // It is very unlikely but due to the network delay
-        // possisble that the other player also tries to
-        // destroy exactly the same object beofre the server
-        // can tell him that this object was already destroyed.
-        // So in that case just do nothing.
-        if (!obj) return;
-
-        NetworkServer.Destroy(obj);
+        if (transform.parent && transform.parent.name == "NestingArrow")
+            Destroy(transform.parent.gameObject);
     }
 }
