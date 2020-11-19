@@ -7,6 +7,8 @@ public class Combat : NetworkBehaviour
 {
     [SyncVar]
     public int health = 100;
+    [SyncVar]
+    public int death = 0;
 
     public void TakeDamage(int amount)
     {
@@ -18,7 +20,15 @@ public class Combat : NetworkBehaviour
 
     void Respawn()
     {
+        death++;
         health = 100;
-        transform.position = Vector3.zero;
+        Trpc_respawn();
+    }
+
+    [TargetRpc]
+    void Trpc_respawn()
+    {
+        transform.position = GetComponent<Player>().initialPosition;
+
     }
 }

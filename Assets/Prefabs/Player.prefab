@@ -156,6 +156,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   health: 100
+  death: 0
 --- !u!114 &8831265435639771703
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,6 +172,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   crossHair: {fileID: 1728568601606590811}
+  initialPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &3538684508706199376
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -6,6 +6,7 @@ using Mirror;
 public class Player : NetworkBehaviour
 {
     public GameObject crossHair;
+    public Vector3 initialPosition;
 
     public override void OnStartLocalPlayer()
     {
@@ -16,6 +17,7 @@ public class Player : NetworkBehaviour
         crossHair.SetActive(true);
         GetComponent<Rigidbody2D>().constraints =
             RigidbodyConstraints2D.FreezeRotation;
+        initialPosition = transform.position;
     }
 
     private void Start()

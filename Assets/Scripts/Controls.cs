@@ -25,6 +25,7 @@ public class Controls : NetworkBehaviour
 
     [Space]
     [Header("Character statistics:")]
+    public float mouvementSpeed = 1.0f;
     public Vector3 aim;
     public Quaternion aimRotation;
     public Vector3 movementDirection;
@@ -77,11 +78,13 @@ public class Controls : NetworkBehaviour
             aiming = true;
         if (aiming)
         {
+            mouvementSpeed = 0.8f;
             if (nextShoot <= 0f)
             {
                 shoot = true;
                 aiming = false;
                 nextShoot = SHOOTING_RATE;
+                mouvementSpeed = 1f;
             }
             nextShoot -= Time.deltaTime;
         }
@@ -109,7 +112,10 @@ public class Controls : NetworkBehaviour
     void Move()
     {
         rb.MovePosition(transform.position +
-            movementDirection * MOVEMENT_BASE_SPEED * Time.fixedDeltaTime);
+            movementDirection *
+            mouvementSpeed *
+            MOVEMENT_BASE_SPEED *
+            Time.fixedDeltaTime);
     }
 
     void Aim()
