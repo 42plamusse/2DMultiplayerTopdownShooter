@@ -23,46 +23,30 @@ public class Controls : NetworkBehaviour
     [Space]
     [Header("Character statistics:")]
     public Vector3 aim;
-    public Vector2 movementDirection;
+    public Vector3 movementDirection;
     public bool shoot;
 
     [Space]
     [Header("Input:")]
     public Vector3 mousePosInWorld;
 
-    public override void OnStartLocalPlayer()
-    {
-        CameraFollow cameraFollowScript =
-            Camera.main.GetComponent<CameraFollow>();
-        cameraFollowScript.target = transform; //Fix camera on "me"
-        cameraFollowScript.enabled = true;
-        crossHair.SetActive(true);
-        //Cursor.visible = false;
-        transform.name = netId.ToString();
-        Cmd_RenamePlayer();
-    }
-
-    [Command]
-    void Cmd_RenamePlayer()
-    {
-        transform.name = netId.ToString();
-    }
-
     void Update()
     {
-        if (!isLocalPlayer) return;
-        ProcessInput();
-        Aim();
-        if (shoot)
+        if (isLocalPlayer)
         {
-            CmdShootArrow(aim, transform.position, netId);
+            ProcessInput();
+            Aim();
+            if (shoot)
+            {
+                CmdShootArrow(aim, transform.position, netId);
+            }
         }
     }
 
     private void FixedUpdate()
     {
-        if (!isLocalPlayer) return;
-        Move();
+        if (isLocalPlayer)
+            Move();
     }
 
     void ProcessInput()
@@ -91,7 +75,8 @@ public class Controls : NetworkBehaviour
 
     void Move()
     {
-        rb.velocity = movementDirection * MOVEMENT_BASE_SPEED;
+        rb.MovePosition(transform.position +
+            movementDirection * MOVEMENT_BASE_SPEED * Time.fixedDeltaTime);
     }
 
     void Aim()
@@ -113,8 +98,6 @@ public class Controls : NetworkBehaviour
         shootingDirection.Normalize();
         Arrow arrowScript = arrow.GetComponent<Arrow>();
         arrowScript.velocity = shootingDirection * ARROW_BASE_SPEED;
-        print("netID" + netId);
-        print("netID" + _netId);
         arrowScript.shooterId = _netId;
         NetworkServer.Spawn(arrow);
         Destroy(arrow, 5.0f);
