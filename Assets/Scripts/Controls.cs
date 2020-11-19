@@ -10,6 +10,8 @@ public class Controls : NetworkBehaviour
     [Header("References:")]
     public GameObject crossHair;
     public Rigidbody2D rb;
+    public Animator animator;
+    public Transform arrowSpawner;
 
     [Space]
     [Header("Prefabs:")]
@@ -19,26 +21,39 @@ public class Controls : NetworkBehaviour
     [Header("Character attributes:")]
     public float MOVEMENT_BASE_SPEED = 10.0f;
     public float ARROW_BASE_SPEED = 20.0f;
+    public float SHOOTING_RATE = 0.5f;
 
     [Space]
     [Header("Character statistics:")]
     public Vector3 aim;
+    public Quaternion aimRotation;
     public Vector3 movementDirection;
     public bool shoot;
+    public bool aiming;
+    public float nextShoot = 0f;
+
 
     [Space]
     [Header("Input:")]
     public Vector3 mousePosInWorld;
-
+    private void Start()
+    {
+        if (isLocalPlayer)
+        {
+            nextShoot = SHOOTING_RATE;
+        }
+    }
     void Update()
     {
         if (isLocalPlayer)
         {
             ProcessInput();
+            Animate();
             Aim();
             if (shoot)
             {
-                CmdShootArrow(aim, transform.position, netId);
+                CmdShootArrow(aim, arrowSpawner.position, netId);
+                shoot = false;
             }
         }
     }
@@ -49,12 +64,27 @@ public class Controls : NetworkBehaviour
             Move();
     }
 
+    void Animate()
+    {
+        animator.SetBool("Aiming", aiming);
+    }
+
     void ProcessInput()
     {
         MovementInput();
         AimInput();
-
-        shoot = Input.GetButtonDown("Fire1");
+        if (Input.GetButtonDown("Fire1"))
+            aiming = true;
+        if (aiming)
+        {
+            if (nextShoot <= 0f)
+            {
+                shoot = true;
+                aiming = false;
+                nextShoot = SHOOTING_RATE;
+            }
+            nextShoot -= Time.deltaTime;
+        }
     }
 
     void MovementInput()
@@ -71,6 +101,9 @@ public class Controls : NetworkBehaviour
         mousePosInWorld = Camera.main.ScreenToWorldPoint(mousePos);
         aim = mousePosInWorld - transform.position;
         aim.Normalize();
+        aimRotation = Quaternion.Euler(0, 0,
+            Mathf.Atan2(aim.y, aim.x) * Mathf.Rad2Deg);
+
     }
 
     void Move()
@@ -82,6 +115,7 @@ public class Controls : NetworkBehaviour
     void Aim()
     {
         crossHair.transform.position = mousePosInWorld;
+        transform.rotation = aimRotation;
     }
 
     [Command]
