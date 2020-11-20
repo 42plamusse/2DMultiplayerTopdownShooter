@@ -7,6 +7,7 @@ public class Player : NetworkBehaviour
 {
     public GameObject crossHair;
     public Vector3 initialPosition;
+    public GameObject FOV_light;
 
     public override void OnStartLocalPlayer()
     {
@@ -18,6 +19,7 @@ public class Player : NetworkBehaviour
         GetComponent<Rigidbody2D>().constraints =
             RigidbodyConstraints2D.FreezeRotation;
         initialPosition = transform.position;
+        FOV_light.SetActive(true);
     }
 
     private void Start()

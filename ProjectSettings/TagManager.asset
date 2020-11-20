@@ -42,3 +42,12 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Ground
+    uniqueID: 3816497261
+    locked: 0
+  - name: Players
+    uniqueID: 3178986371
+    locked: 0
+  - name: Walls
+    uniqueID: 3883593281
+    locked: 0

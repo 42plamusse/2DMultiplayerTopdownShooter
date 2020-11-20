@@ -42,12 +42,6 @@ public class Arrow : NetworkBehaviour
             foreach(RaycastHit2D hit in hits)
             {
                 GameObject other = hit.collider.gameObject;
-                print(hit.collider.name);
-                print(shooterId);
-                print("TransformPos" + transform.position);
-                print("currentPos" + currentPosition);
-                print("nextPos" + nextPosition);
-
                 if (other.name != shooterId.ToString())
                 {
                     if (other.CompareTag("Player"))

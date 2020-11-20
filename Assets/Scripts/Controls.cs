@@ -28,7 +28,7 @@ public class Controls : NetworkBehaviour
     public float mouvementSpeed = 1.0f;
     public Vector3 aim;
     public Quaternion aimRotation;
-    public Vector3 movementDirection;
+    public Vector2 velocity;
     public bool shoot;
     public bool aiming;
     public float nextShoot = 0f;
@@ -92,9 +92,9 @@ public class Controls : NetworkBehaviour
 
     void MovementInput()
     {
-        movementDirection = new Vector3(Input.GetAxis("Horizontal"),
-            Input.GetAxis("Vertical"), 0.0f);
-        movementDirection.Normalize();
+        velocity = new Vector2(Input.GetAxis("Horizontal"),
+            Input.GetAxis("Vertical"));
+        velocity.Normalize();
     }
 
     void AimInput()
@@ -111,9 +111,9 @@ public class Controls : NetworkBehaviour
 
     void Move()
     {
-        rb.MovePosition(transform.position +
-            movementDirection *
-            mouvementSpeed *
+        rb.MovePosition(rb.position +
+            velocity *
+            mouvementSpeed * 
             MOVEMENT_BASE_SPEED *
             Time.fixedDeltaTime);
     }
